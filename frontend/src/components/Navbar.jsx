@@ -11,7 +11,7 @@ const Navbar = ({ navType }) => {
   const navLinks = [
     "Home",
     "About",
-    "Songs",
+    "Trending Song",
     "Upcoming Song",
     "Artists",
     "Contact",
@@ -20,71 +20,84 @@ const Navbar = ({ navType }) => {
   const routeMap = {
     Home: "/",
     About: "/about",
-    "Songs": "/songs",
+    "Trending Song": "/songs",
     "Upcoming Song": "/upcoming",
     Artists: "/artists",
     Contact: "/contact",
   };
 
-  return (
-    <nav
-      className={`
-        w-full fixed top-0 left-0 z-50 transition-all duration-300
-        ${
-          navType === "transparent"
-            ? "bg-transparent backdrop-blur-[6px] border-b border-[#ffffff22]"
-            : "bg-[#111] border-t border-b border-[#303030]"
-        }
-      `}
-    >
-      <div className="max-w-[1920px] mx-auto px-12 py-4">
-        <div className="flex items-center gap-10">
+  // NAVBAR STYLE BASED ON navType
 
-          {/* Logo */}
+
+  return (
+    <nav className={`w-full fixed top-0 left-0 z-50 transition-all 
+    ${
+      navType === "transparent"
+      ? "bg-[#111]/70 border-b border-[#303030]"
+      : "bg-[#111] border-b border-[#303030]"
+  }
+`}
+>
+
+      <div className="max-w-[1920px] mx-auto px-12 py-4">
+        <div className="flex items-center gap-12">
+
+          {/* LOGO */}
           <Link to="/" onClick={() => setActiveLink("Home")}>
-            <img src={logo} alt="KM Music Logo" className="h-16 w-auto" />
+            <img src={logo} alt="KM Logo" className="h-20 w-auto" />
           </Link>
 
-          {/* Search bar */}
-          <div className="hidden md:flex flex-1 max-w-[550px]">
-            <div className="relative flex items-center bg-[#4A4A4A] rounded-full px-8 py-3 w-full">
+          {/* SEARCH BAR */}
+          <div className="hidden md:flex flex-1 max-w-[420px]">
+            <div className="
+              relative flex items-center 
+              bg-[#3D3D3D] rounded-[22px]
+              px-6 py-3 w-full shadow-[0_0_10px_rgba(0,0,0,0.45)]
+            ">
               <input
                 type="text"
                 placeholder="Search Here"
-                className="flex-1 bg-transparent text-white placeholder:text-white text-lg outline-none"
+                className="flex-1 bg-transparent text-white placeholder:text-gray-300 text-base outline-none"
               />
-              <img src={searchIcon} alt="search" className="w-5 h-5 ml-3" />
+              <img src={searchIcon} alt="search" className="w-5 h-5 ml-3 opacity-80" />
             </div>
           </div>
 
-          {/* Vertical Divider */}
-          <div className="hidden lg:block h-12 w-px bg-[#3A3A3A]"></div>
+          {/* DIVIDER */}
+          <div className="hidden lg:block h-10 w-px bg-[#3A3A3A]"></div>
 
-          {/* Desktop Nav Links */}
+          {/* NAV LINKS */}
           <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link}
                 to={routeMap[link]}
                 onClick={() => setActiveLink(link)}
-                className={`text-lg font-medium transition-colors ${
-                  activeLink === link
-                    ? "text-white"
-                    : "text-[#7a7a7a] hover:text-white"
-                }`}
+                className={`
+                  text-[18px] font-medium transition-all
+                  ${activeLink === link ? "text-white" : "text-[#7A7A7A] hover:text-white"}
+                `}
               >
                 {link}
               </Link>
             ))}
           </div>
 
-          {/* Login Button */}
-          <button className="flex items-center gap-2 bg-[#246BFD] rounded-full px-7 py-2.5 text-white text-lg font-medium hover:bg-[#1e5dd9] transition">
+          {/* LOGIN BUTTON */}
+          <button
+            className="
+              flex items-center gap-2 
+              bg-[#246BFD] rounded-full 
+              px-7 py-3 text-white text-sm font-medium 
+              shadow-[0_0_12px_rgba(36,107,253,0.45)]
+              hover:bg-[#1e5dd9] transition
+            "
+          >
             Login
-            <img src={loginIcon} alt="login" className="w-5 h-5" />
+            <img src={loginIcon} alt="login" className="w-4 h-4" />
           </button>
 
-          {/* Mobile Menu Icon */}
+          {/* MOBILE MENU ICON */}
           <button
             className="lg:hidden p-2 ml-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -107,11 +120,10 @@ const Navbar = ({ navType }) => {
           </button>
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* MOBILE MENU */}
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-[#303030] pt-4">
-
-            {/* Mobile Search */}
+            {/* MOBILE SEARCH */}
             <div className="mb-4">
               <div className="relative flex items-center bg-[#3F3F3F] rounded-full px-6 py-3">
                 <input
@@ -123,7 +135,7 @@ const Navbar = ({ navType }) => {
               </div>
             </div>
 
-            {/* Mobile Nav Links */}
+            {/* MOBILE NAV LINKS */}
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
@@ -133,11 +145,10 @@ const Navbar = ({ navType }) => {
                     setActiveLink(link);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`text-left text-lg font-medium transition-colors py-2 ${
-                    activeLink === link
-                      ? "text-white"
-                      : "text-[#7a7a7a] hover:text-white"
-                  }`}
+                  className={`
+                    text-left text-lg font-medium transition-colors py-2
+                    ${activeLink === link ? "text-white" : "text-[#7A7A7A] hover:text-white"}
+                  `}
                 >
                   {link}
                 </Link>
