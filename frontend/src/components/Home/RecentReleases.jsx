@@ -1,10 +1,12 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { FaPlay, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { PlayerContext } from "../../context/PlayerContext"; // ✅ ADDED
 
 const RecentReleases = () => {
   const scrollRef = useRef();
   const [albums, setAlbums] = useState([]);
+  const { playSong } = useContext(PlayerContext); // ✅ ADDED
 
   const slideLeft = () => {
     scrollRef.current.scrollBy({ left: -280, behavior: "smooth" });
@@ -18,15 +20,12 @@ const RecentReleases = () => {
   useEffect(() => {
     const fetchSongs = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/songs"
-        );
+        const res = await axios.get("http://localhost:5000/api/songs");
         setAlbums(res.data.songs);
       } catch (error) {
         console.error("RECENT SONG FETCH ERROR:", error);
       }
     };
-
     fetchSongs();
   }, []);
 
@@ -53,7 +52,6 @@ const RecentReleases = () => {
   return (
     <div className="w-full flex justify-center overflow-hidden">
       <div className="w-full max-w-[1900px] px-3 sm:px-6 md:px-10">
-
         <style>{hideScrollbarWebkit}</style>
 
         {/* HEADER */}
@@ -179,7 +177,9 @@ const RecentReleases = () => {
                   </p>
                 </div>
 
+                {/* 🔥 ONLY THIS LINE ADDED */}
                 <button
+                  onClick={() => playSong(item)}
                   className="
                     w-8 h-8 sm:w-10 sm:h-10 
                     rounded-full bg-gray-500 
@@ -192,7 +192,6 @@ const RecentReleases = () => {
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );

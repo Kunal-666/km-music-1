@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { PlayerContext } from "./PlayerContext";
 
 export const PlayerProvider = ({ children }) => {
@@ -7,25 +7,37 @@ export const PlayerProvider = ({ children }) => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const playSong = (song) => {
-    if (!song) return;
+  const playSong = async (song) => {
+    if (!song?.songUrl && !song?.audioUrl) return;
 
-    if (currentSong?.songUrl === song.songUrl) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-      return;
+    const url = song.audioUrl || song.songUrl;
+
+    // Load new song if different
+    if (currentSong?.songUrl !== url && currentSong?.audioUrl !== url) {
+      audioRef.current.src = url;
     }
 
-    audioRef.current.src = song.songUrl;
-    audioRef.current.play();
-
-    setCurrentSong(song);
-    setIsPlaying(true);
+    try {
+      await audioRef.current.play();
+      setCurrentSong(song);
+      setIsPlaying(true);
+    } catch (err) {
+      console.warn("Play blocked:", err);
+    }
   };
+
+  const pauseSong = () => {
+    audioRef.current.pause();
+    setIsPlaying(false);
+  };
+
+  // Keep UI in sync when song ends
+  useEffect(() => {
+    const audio = audioRef.current;
+    const onEnded = () => setIsPlaying(false);
+    audio.addEventListener("ended", onEnded);
+    return () => audio.removeEventListener("ended", onEnded);
+  }, []);
 
   return (
     <PlayerContext.Provider
@@ -34,7 +46,7 @@ export const PlayerProvider = ({ children }) => {
         currentSong,
         isPlaying,
         playSong,
-        setIsPlaying,
+        pauseSong, // ✅ THIS FIXES EVERYTHING
       }}
     >
       {children}
