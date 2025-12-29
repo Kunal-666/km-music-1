@@ -1,60 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// Images
-import img1 from "../../assets/img/artists/img1.png";
-import img2 from "../../assets/img/artists/img2.png";
-import img3 from "../../assets/img/artists/img3.png";
-import img4 from "../../assets/img/artists/img4.png";
-import img5 from "../../assets/img/artists/img5.png";
-import img6 from "../../assets/img/artists/img6.png";
-
-/* ================= ARTISTS DATA ================= */
-const artists = [
-  {
-    img: img1,
-    name: "M Bobby",
-    studio: "Ray Studio",
-    bio:
-      "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in classical Latin literature.",
-  },
-  {
-    img: img2,
-    name: "John Smith",
-    studio: "Sky Records",
-    bio: "John Smith is a global music artist with millions of listeners.",
-  },
-  {
-    img: img3,
-    name: "Alicia R",
-    studio: "Dream Studio",
-    bio: "Alicia creates soulful emotional tracks loved worldwide.",
-  },
-  {
-    img: img4,
-    name: "Kara V",
-    studio: "Wave Music",
-    bio: "Kara V is known for wave-style electronic music.",
-  },
-  {
-    img: img5,
-    name: "Rocky D",
-    studio: "Thunder Records",
-    bio: "Rocky brings thunder to the stage with high energy.",
-  },
-  {
-    img: img6,
-    name: "Jenny P",
-    studio: "Silver Studio",
-    bio: "Jenny P is a silver-voice artist.",
-  },
-];
+import axios from "axios";
 
 const ITEMS_PER_PAGE = 8;
 
-const Artists = () => {
+const ArtistsSection = () => {
+  const [artists, setArtists] = useState([]);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+
+  /* ================= FETCH ARTISTS FROM BACKEND ================= */
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/artists");
+        setArtists(res.data.artists); // 👈 backend artists
+      } catch (err) {
+        console.error("Artists fetch error:", err);
+      }
+    };
+
+    fetchArtists();
+  }, []);
 
   const totalPages = Math.ceil(artists.length / ITEMS_PER_PAGE);
   const startIndex = (page - 1) * ITEMS_PER_PAGE;
@@ -64,24 +31,25 @@ const Artists = () => {
     <section className="bg-black py-20">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* ================= GRID ================= */}
+        {/* ================= GRID (DESIGN SAME) ================= */}
         <div className="grid grid-cols-4 gap-10 max-lg:grid-cols-2 max-sm:grid-cols-1">
-          {currentItems.map((artist, index) => (
+          {currentItems.map((artist) => (
             <div
-              key={index}
+              key={artist._id}
               onClick={() =>
                 navigate(`/artist/${encodeURIComponent(artist.name)}`, {
-                  state: { artist },
+                  state: { artist }, // 👈 same flow as before
                 })
               }
               className="relative h-[460px] rounded-3xl overflow-hidden cursor-pointer group"
             >
               {/* IMAGE */}
               <img
-                src={artist.img}
+                src={artist.imageUrl}        // 👈 backend image
                 alt={artist.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
+
 
               {/* OVERLAY */}
               <div className="absolute inset-0 bg-gradient-to-t from-purple-800/90 via-purple-600/40 to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end items-center pb-6">
@@ -96,7 +64,7 @@ const Artists = () => {
           ))}
         </div>
 
-        {/* ================= PAGINATION ================= */}
+        {/* ================= PAGINATION (SAME) ================= */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-6 mt-16">
             <button
@@ -122,4 +90,4 @@ const Artists = () => {
   );
 };
 
-export default Artists;
+export default ArtistsSection;
