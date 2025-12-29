@@ -4,7 +4,7 @@ import React from "react";
 import Hero from "../components/Home/Hero";
 import Artists from "../components/Home/Artists";
 import Genres_Category from "../components/Home/Genres_Category";
-import MusicCharts from "../components/Home/MusicCharts";
+
 import MusicPlayer from "../components/Home/MusicPlayer";
 import RecentReleases from "../components/Home/RecentReleases";
 import TopWeeklyCharts from "../components/Home/TopWeeklyCharts";
@@ -15,7 +15,7 @@ const Home = () => {
     <div className="bg-[#111] text-white">
       <Hero />
       <RecentReleases />
-      <MusicCharts />
+    
       <TopWeeklyCharts />
       <MusicPlayer />
       <Artists />
