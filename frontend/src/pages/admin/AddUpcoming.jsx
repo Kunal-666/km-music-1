@@ -1,20 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../../components/admin/AdminLayout";
 
 const AddUpcoming = () => {
+  /* ================= ARTIST STATES ================= */
+  const [artists, setArtists] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [showArtistList, setShowArtistList] = useState(false);
+
+  /* ================= FORM STATES ================= */
   const [formData, setFormData] = useState({
     songTitle: "",
-    sungBy: "",
     previewInfo: "",
     publishedDate: "",
-    itemType: "MP3",
+    youtubeUrl: "",
+    category: "Punjabi",
   });
 
-  const [trailerFile, setTrailerFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  /* ================= FETCH ARTISTS ================= */
+  useEffect(() => {
+    fetchArtists();
+  }, []);
+
+  const fetchArtists = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/songs/artists"
+      );
+
+      const withIds = (res.data.artists || []).map((a, index) => ({
+        ...a,
+        numericId: index + 1,
+      }));
+
+      setArtists(withIds);
+    } catch (err) {
+      console.error("Artist fetch error:", err);
+    }
+  };
+
+  /* ================= HANDLERS ================= */
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,11 +51,12 @@ const AddUpcoming = () => {
     });
   };
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!trailerFile) {
-      alert("Trailer file is required");
+    if (!selectedArtist) {
+      alert("Please select artist");
       return;
     }
 
@@ -40,51 +70,55 @@ const AddUpcoming = () => {
 
       const data = new FormData();
       data.append("songTitle", formData.songTitle);
-      data.append("sungBy", formData.sungBy);
+      data.append("sungBy", selectedArtist._id); // 🔥 IMPORTANT
       data.append("previewInfo", formData.previewInfo);
       data.append("publishedDate", formData.publishedDate);
-      data.append("itemType", formData.itemType);
-      data.append("trailer", trailerFile);
+      data.append("youtubeUrl", formData.youtubeUrl);
       data.append("thumbnail", thumbnailFile);
-      
-  
+      data.append("category", formData.category);
 
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/upcoming/add",
         data,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
       alert("Upcoming song added successfully ✅");
-      console.log(res.data);
 
-      // Reset form
+      // RESET
       setFormData({
         songTitle: "",
-        sungBy: "",
         previewInfo: "",
         publishedDate: "",
-        itemType: "MP3",
+        youtubeUrl: "",
+        category: "Punjabi",
       });
-      setTrailerFile(null);
+      
+      setSelectedArtist(null);
+      setSearch("");
       setThumbnailFile(null);
-      document.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Something went wrong ❌");
+      alert("Upload failed ❌");
     } finally {
       setLoading(false);
     }
   };
 
+  const filteredArtists = artists.filter(
+    (a) =>
+      a.name.toLowerCase().includes(search.toLowerCase()) ||
+      String(a.numericId).includes(search)
+  );
+
   return (
     <AdminLayout>
       <div className="max-w-6xl mx-auto p-6">
-        <h2 className="text-3xl font-bold mb-8 text-white">Add Upcoming Song</h2>
+        <h2 className="text-3xl font-bold mb-8 text-white">
+          Add Upcoming Song
+        </h2>
 
         <form onSubmit={handleSubmit}>
           <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] p-8 rounded-2xl shadow-2xl border border-purple-900/20">
@@ -113,20 +147,54 @@ const AddUpcoming = () => {
                   />
                 </div>
 
-                {/* Sung By */}
-                <div>
+                {/* SUNG BY (DESIGN SAME, CLICK TO OPEN) */}
+                <div className="relative">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Sung By *
                   </label>
+
                   <input
                     type="text"
-                    name="sungBy"
-                    placeholder="Enter artist name"
-                    value={formData.sungBy}
-                    onChange={handleChange}
-                    required
-                    className="w-full p-3 rounded-xl bg-[#0d0d0d] border border-gray-800 outline-none focus:border-purple-500 transition text-white"
+                    placeholder="Select artist"
+                    value={
+                      selectedArtist
+                        ? `${selectedArtist.numericId} - ${selectedArtist.name}`
+                        : search
+                    }
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setShowArtistList(true);
+                    }}
+                    onFocus={() => setShowArtistList(true)}
+                    className="w-full p-3 rounded-xl bg-[#0d0d0d] border border-gray-800 outline-none focus:border-purple-500 transition text-white cursor-pointer"
                   />
+
+                  {showArtistList && (
+                    <div className="absolute z-20 mt-2 w-full max-h-52 overflow-y-auto bg-[#0d0d0d] border border-gray-800 rounded-xl shadow-xl">
+                      {filteredArtists.map((a) => (
+                        <div
+                          key={a._id}
+                          onClick={() => {
+                            setSelectedArtist(a);
+                            setSearch(`${a.numericId} - ${a.name}`);
+                            setShowArtistList(false);
+                          }}
+                          className="px-4 py-3 cursor-pointer hover:bg-purple-700 text-white"
+                        >
+                          <span className="text-purple-400 mr-2">
+                            {a.numericId}
+                          </span>
+                          {a.name}
+                        </div>
+                      ))}
+
+                      {filteredArtists.length === 0 && (
+                        <div className="px-4 py-3 text-gray-400">
+                          No artists found
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Published Date */}
@@ -144,51 +212,43 @@ const AddUpcoming = () => {
                   />
                 </div>
 
-                {/* Item Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Item Type *
-                  </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="itemType"
-                        value="MP3"
-                        checked={formData.itemType === "MP3"}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-purple-600"
-                      />
-                      <span className="text-white">MP3</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="itemType"
-                        value="Video"
-                        checked={formData.itemType === "Video"}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-purple-600"
-                      />
-                      <span className="text-white">Video</span>
-                    </label>
-                  </div>
-                </div>
+                {/* Category */}
+<div>
+  <label className="block text-sm font-medium text-gray-300 mb-2">
+    Category *
+  </label>
 
-                {/* Trailer Upload */}
+  <select
+    name="category"
+    value={formData.category}
+    onChange={handleChange}
+    required
+    className="w-full p-3 rounded-xl bg-[#0d0d0d] border border-gray-800 outline-none focus:border-purple-500 transition text-white"
+  >
+    <option value="Punjabi">Punjabi</option>
+    <option value="Haryanvi">Haryanvi</option>
+    <option value="Bollywood">Bollywood</option>
+    <option value="Hollywood">Hollywood</option>
+    <option value="Rock">Rock</option>
+    <option value="Culture">Culture</option>
+  </select>
+</div>
+  
+
+                {/* YouTube URL */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Upload Trailer {formData.itemType === "MP3" ? "Audio" : "Video"} *
+                    YouTube Video URL *
                   </label>
                   <input
-                    type="file"
-                    accept={formData.itemType === "MP3" ? "audio/*" : "video/*"}
-                    onChange={(e) => setTrailerFile(e.target.files[0])}
-                    className="w-full p-3 rounded-xl bg-[#0d0d0d] border border-gray-800 text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:cursor-pointer hover:file:bg-purple-700"
+                    type="url"
+                    name="youtubeUrl"
+                    placeholder="https://www.youtube.com/watch?v=xxxxx"
+                    value={formData.youtubeUrl}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 rounded-xl bg-[#0d0d0d] border border-gray-800 outline-none focus:border-purple-500 transition text-white"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Upload {formData.itemType === "MP3" ? "audio" : "video"} file
-                  </p>
                 </div>
               </div>
 
@@ -198,7 +258,7 @@ const AddUpcoming = () => {
                   Additional Details
                 </h3>
 
-                {/* Preview Information */}
+                {/* Preview Info */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Preview Information
@@ -213,7 +273,7 @@ const AddUpcoming = () => {
                   />
                 </div>
 
-                {/* Thumbnail Upload */}
+                {/* Thumbnail */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Upload Thumbnail Image *
@@ -228,28 +288,17 @@ const AddUpcoming = () => {
                     Main thumbnail for the song
                   </p>
                 </div>
-
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* SUBMIT */}
             <div className="mt-8">
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-4 rounded-xl font-semibold text-lg shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Uploading...
-                  </span>
-                ) : (
-                  "🎵 Add Upcoming Song"
-                )}
+                {loading ? "Uploading..." : "🎵 Add Upcoming Song"}
               </button>
             </div>
           </div>

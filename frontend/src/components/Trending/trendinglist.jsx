@@ -1,182 +1,95 @@
-import React, { useRef, useState } from "react";
-import artistAvatar from "../../assets/artist-avatar.png";
-import songFile from "../../assets/musicsong/shri-hanuman-chalisa.mp3";
-import { Heart, Download, Volume2, Play, Pause } from "lucide-react";
-
-const songs = [
-  { id: 1, genre: "Punjabi", title: "Awsome Song", artist: "Manjeet Kaur" },
-  { id: 2, genre: "Punjabi", title: "Awsome Song", artist: "Manjeet Kaur" },
-  { id: 3, genre: "Haryanvi", title: "Awsome Song", artist: "Manjeet Kaur" },
-  { id: 4, genre: "Haryanvi", title: "Awsome Song", artist: "Manjeet Kaur" },
-  { id: 5, genre: "Bollywood", title: "Awsome Song", artist: "Manjeet Kaur" },
-];
-
-const formatTime = (time) => {
-  if (!time) return "00:00";
-  const m = Math.floor(time / 60);
-  const s = Math.floor(time % 60);
-  return `${m}:${s < 10 ? "0" : ""}${s}`;
-};
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { Play } from "lucide-react";
+import { PlayerContext } from "../../context/PlayerContext";
 
 const TrendingList = ({ selectedGenre }) => {
-  const audioRefs = useRef({});
-  const [activeId, setActiveId] = useState(null);
-  const [progress, setProgress] = useState({});
-  const [currentTime, setCurrentTime] = useState({});
-  const [duration, setDuration] = useState({});
-  const [volume, setVolume] = useState({});
-  const [likes, setLikes] = useState({});
+  const { playSong, currentSong } = useContext(PlayerContext);
+  const [songs, setSongs] = useState([]);
 
+  /* ================= FETCH SONGS ================= */
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/songs");
+        setSongs(res.data.songs || []);
+      } catch (err) {
+        console.error("Songs fetch error:", err);
+      }
+    };
+    fetchSongs();
+  }, []);
+
+  /* ================= FILTER BY CATEGORY ================= */
   const filteredSongs = songs.filter(
-    (song) => song.genre === selectedGenre
+    (song) =>
+      song.category &&
+      selectedGenre &&
+      song.category.toLowerCase() === selectedGenre.toLowerCase()
   );
 
-  const togglePlay = (id) => {
-    if (activeId && activeId !== id) {
-      audioRefs.current[activeId].pause();
-    }
-
-    const audio = audioRefs.current[id];
-
-    if (activeId === id) {
-      audio.pause();
-      setActiveId(null);
-    } else {
-      audio.play();
-      setActiveId(id);
-    }
-  };
-
   return (
-    <section className="bg-black py-10">
-      <div className="max-w-7xl mx-auto px-4 space-y-6">
+    <section className="bg-black py-12">
+      <div className="max-w-7xl mx-auto px-4">
 
-        {filteredSongs.map((song) => (
-          <div
-            key={song.id}
-            className={`flex items-center px-6 py-5 rounded-xl
-              ${activeId === song.id
-                ? "bg-gradient-to-r from-[#4A78FF] to-[#B83CFF]"
-                : "bg-[#141414]"
-              }`}
-          >
-            {/* AUDIO */}
-            <audio
-              ref={(el) => (audioRefs.current[song.id] = el)}
-              src={songFile}
-              onTimeUpdate={(e) => {
-                setCurrentTime((p) => ({
-                  ...p,
-                  [song.id]: e.target.currentTime,
-                }));
-                setProgress((p) => ({
-                  ...p,
-                  [song.id]:
-                    (e.target.currentTime / e.target.duration) * 100 || 0,
-                }));
-              }}
-              onLoadedMetadata={(e) =>
-                setDuration((p) => ({
-                  ...p,
-                  [song.id]: e.target.duration,
-                }))
-              }
-            />
+        {/* SONG GRID (2 PER ROW) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-            {/* ARTIST */}
-            <div className="flex items-center gap-4 w-[260px]">
-              <img src={artistAvatar} className="w-14 h-14 rounded-full" />
-              <div>
-                <h4 className="text-white font-semibold">{song.artist}</h4>
-                <p className="text-white/60 text-sm">{song.title}</p>
-              </div>
-            </div>
-
-            <div className="w-px h-10 bg-white/30 mx-4" />
-
-            {/* PLAY */}
-            <button
-              onClick={() => togglePlay(song.id)}
-              className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center"
+          {filteredSongs.map((song) => (
+            <div
+              key={song._id}
+              className="
+                flex items-center gap-6
+                px-6 py-6 rounded-2xl
+                bg-[#141414]
+                hover:bg-[#1c1c1c]
+                transition
+              "
             >
-              {activeId === song.id ? <Pause size={18} /> : <Play size={18} />}
-            </button>
+              {/* THUMBNAIL */}
+              <img
+                src={song.thumbnailUrl}
+                alt={song.songName}
+                className="w-20 h-20 rounded-xl object-cover"
+              />
 
-            {/* PROGRESS */}
-            <div className="flex items-center gap-4 flex-1 mx-6">
-              <span className="w-[45px] text-sm">
-                {formatTime(currentTime[song.id])}
-              </span>
-
-              <div className="flex-1 h-[2px] bg-white/30 relative">
-                <div
-                  className="absolute h-full bg-white"
-                  style={{ width: `${progress[song.id] || 0}%` }}
-                />
+              {/* TEXT */}
+              <div className="flex-1">
+                <h4 className="text-white text-lg font-semibold">
+                  {song.songName}
+                </h4>
+                <p className="text-white/60 text-sm mt-1">
+                  {song.artistName}
+                </p>
               </div>
 
-              <span className="w-[45px] text-sm">
-                {formatTime(duration[song.id])}
-              </span>
-
-              {/* VOLUME */}
-              {activeId === song.id && (
-                <div className="flex items-center gap-2 ml-3">
-                  <Volume2 size={16} />
-                  <div
-                    onClick={(e) => {
-                      const rect = e.target.getBoundingClientRect();
-                      const v = (e.clientX - rect.left) / rect.width;
-                      audioRefs.current[song.id].volume = v;
-                      setVolume((p) => ({ ...p, [song.id]: v }));
-                    }}
-                    className="w-[60px] h-[2px] bg-white/40 relative cursor-pointer"
-                  >
-                    <div
-                      className="absolute h-full bg-white"
-                      style={{
-                        width: `${(volume[song.id] || 0.7) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ACTIONS */}
-            <div className="px-6 py-3 border border-white/70 rounded-full flex items-center gap-4 text-sm">
-              <span>Download</span>
-
-              {/* ✅ FIXED LIKE DESIGN */}
+              {/* PLAY BUTTON */}
               <button
-                onClick={() =>
-                  setLikes((p) => ({
-                    ...p,
-                    [song.id]: (p[song.id] || 0) + 1,
-                  }))
-                }
-                className="flex items-center gap-2 min-w-[50px] justify-center"
+                onClick={() => playSong(song)}
+                className={`
+                  w-14 h-14 rounded-full
+                  flex items-center justify-center
+                  transition
+                  ${
+                    currentSong?._id === song._id
+                      ? "bg-gradient-to-r from-[#4A78FF] to-[#B83CFF]"
+                      : "bg-white/20 hover:bg-white/30"
+                  }
+                `}
               >
-                <Heart size={22} />
-                <span className="text-xs w-[12px] text-left">
-                  {likes[song.id] || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const a = document.createElement("a");
-                  a.href = songFile;
-                  a.download = "song.mp3";
-                  a.click();
-                }}
-              >
-                <Download size={20} />
+                <Play size={22} className="text-white" />
               </button>
             </div>
-          </div>
-        ))}
+          ))}
 
+        </div>
+
+        {/* EMPTY STATE */}
+        {filteredSongs.length === 0 && (
+          <p className="text-white/50 text-center mt-10">
+            No songs found in {selectedGenre}
+          </p>
+        )}
       </div>
     </section>
   );

@@ -5,37 +5,32 @@ const upcomingSongSchema = new mongoose.Schema(
     songTitle: {
       type: String,
       required: true,
-      trim: true,
+    },
+
+    category: {
+      type: String,
+      enum: ["Punjabi", "Haryanvi", "Bollywood", "Hollywood", "Rock", "Culture"],
+      required: true,
     },
 
     sungBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Artist",
       required: true,
-      trim: true,
     },
 
-    previewInfo: {
-      type: String,
-      default: "",
-    },
+    previewInfo: String,
 
     publishedDate: {
       type: Date,
       required: true,
     },
 
-    itemType: {
-      type: String,
-      enum: ["MP3", "Video"],
-      default: "MP3",
-    },
-
-    trailerUrl: {
+    youtubeUrl: {
       type: String,
       required: true,
     },
 
-    // ✅ ADD THIS
     thumbnailUrl: {
       type: String,
       required: true,
@@ -50,3 +45,4 @@ const upcomingSongSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("UpcomingSong", upcomingSongSchema);
+

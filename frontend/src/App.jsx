@@ -74,10 +74,10 @@ function AppContent() {
         <Route path="/songs" element={<Trending />} />
         <Route path="/artists" element={<Artists />} />
         <Route path="/artist/:name" element={<Artistsmusic />} />
-        <Route path="/upcoming" element={<Upcoming />} />
+        <Route path="/videos" element={<Upcoming />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/song" element={<Upcominginner />} />
-        
+        <Route path="/upcoming/:id" element={<Upcominginner />} />
+
 
         {/* 🔒 USER PROTECTED */}
         <Route

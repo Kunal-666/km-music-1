@@ -2,29 +2,20 @@ import React from "react";
 import hoverImg from "../../assets/img/genrescategory/Rectangle 59.png";
 
 const genres = [
-  "Poetry",
-  "Adventure",
-  "Classical",
-  "Birthday",
-  "Contemporary",
-  "Country",
-  "Documentary",
-  "Fiction",
-  "Cuture",
-  "Hip-Hop",
+  "Culture",
   "Punjabi",
   "Haryanvi",
+  "Classical",
   "Bollywood",
   "Hollywood",
+  "Birthday",
   "Rock",
   "Rap",
-  "Playful",
   "Soulful",
-  "Sad",
-  "Gym",
+  
 ];
 
-const GenresCategory = () => {
+const GenresCategory = ({ selectedGenre, onSelect }) => {
   return (
     <section className="w-full text-white py-16">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-[60px]">
@@ -43,70 +34,50 @@ const GenresCategory = () => {
           Genres Category
         </h2>
 
-        {/* RESPONSIVE GRID */}
-        <div
-          className="
-            grid
-            grid-cols-2 
-            sm:grid-cols-2 
-            md:grid-cols-3 
-            lg:grid-cols-5
+        {/* GRID */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 md:gap-6">
+          {genres.map((item) => {
+            const isActive = selectedGenre === item;
 
-            gap-4 sm:gap-6 md:gap-6
-          "
-        >
-          {genres.map((item) => (
-            <button
-              key={item}
-              className="
-                group relative 
-                w-full
-                h-[60px] sm:h-[65px] md:h-[70px] lg:h-[75px]
-                rounded-[6px]
-                overflow-hidden
-                border border-white/20
-                bg-gradient-to-r from-[#171717] to-[#0C0C0C]
-                transition-all duration-300 
-                hover:border-white/50
-                flex items-center justify-center
-              "
-            >
-              {/* Default background */}
-              <div
-                className="
-                  absolute inset-0 
-                  bg-gradient-to-r from-[#171717] to-[#0C0C0C]
-                  group-hover:opacity-0 
-                  transition-opacity duration-300
-                "
-              />
+            return (
+              <button
+                key={item}
+                onClick={() => onSelect(item)}
+                className="group relative w-full h-[60px] sm:h-[65px] md:h-[70px] lg:h-[75px]
+                  rounded-[6px] overflow-hidden border transition-all duration-300
+                  flex items-center justify-center
+                  border-white/20 hover:border-white/50"
+              >
+                {/* DEFAULT BG */}
+                <div
+                  className={`absolute inset-0 transition-opacity duration-300
+                    ${isActive ? "opacity-0" : "bg-gradient-to-r from-[#171717] to-[#0C0C0C]"}
+                  `}
+                />
 
-              {/* Hover Background */}
-              <img
-                src={hoverImg}
-                alt=""
-                className="
-                  absolute inset-0 w-full h-full object-cover
-                  opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300
-                "
-              />
+                {/* IMAGE BG */}
+                <img
+                  src={hoverImg}
+                  alt=""
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300
+                    ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                  `}
+                />
 
-              {/* Dark overlay */}
-              <div
-                className="
-                  absolute inset-0 bg-black/40
-                  opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300
-                "
-              />
+                {/* DARK OVERLAY */}
+                <div
+                  className={`absolute inset-0 bg-black/40 transition-opacity duration-300
+                    ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                  `}
+                />
 
-              {/* Text */}
-              <span className="relative z-10 text-base sm:text-lg md:text-xl font-medium">
-                {item}
-              </span>
-            </button>
-          ))}
+                {/* TEXT */}
+                <span className="relative z-10 text-base sm:text-lg md:text-xl font-medium">
+                  {item}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
       </div>

@@ -15,7 +15,7 @@ const UpcomingHero = () => {
       {/* Content */}
       <div className="relative z-10 text-center px-4">
         <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-        Upcoming Song
+        Video Song
         </h1>
 
         <p className="text-gray-300 text-lg md:text-xl">

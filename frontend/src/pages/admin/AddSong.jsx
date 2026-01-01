@@ -180,7 +180,7 @@ const AddSong = () => {
           </select>
 
           {/* AUDIO TYPE */}
-          <div className="flex gap-8">
+{/* <div className="flex gap-8">
             <label>
               <input
                 type="radio"
@@ -188,7 +188,7 @@ const AddSong = () => {
                 value="MP3"
                 checked={formData.audioType === "MP3"}
                 onChange={handleChange}
-              /> MP3
+              /> MP3          
             </label>
             <label>
               <input
@@ -199,7 +199,7 @@ const AddSong = () => {
                 onChange={handleChange}
               /> Video
             </label>
-          </div>
+          </div> */}
 
           {/* MP3 MULTIPLE */}
           {formData.audioType === "MP3" && (

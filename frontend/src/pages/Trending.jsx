@@ -5,7 +5,7 @@ import TrendingCategory from "../components/Trending/trendingcategory";
 import TrendingList from "../components/Trending/trendinglist";
 import MusicPlayer from "../components/Home/MusicPlayer";
 const Trending = () => {
-  const [selectedGenre, setSelectedGenre] = useState("Punjabi");
+  const [selectedGenre, setSelectedGenre] = useState("Culture");
 
   return (
     <div className="bg-[#111] text-white">

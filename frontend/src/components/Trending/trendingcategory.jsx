@@ -2,16 +2,18 @@ import React from "react";
 import hoverImg from "../../assets/img/genrescategory/Rectangle 59.png";
 
 const genres = [
-  "Punjabi",
-  "Haryanvi",
-  "Bollywood",
-  "Hollywood",
-  "Rock",
-  "Rap",
-  "Playful",
-  "Soulfull",
-  "Sad",
-  "Gym",
+  
+    "Culture",
+    "Punjabi",
+    "Haryanvi",
+    "Classical",
+    "Bollywood",
+    "Hollywood",
+    "Rock",
+    "Rap",
+    "Soulful",
+    "Birthday"
+   
 ];
 
 const TrendingCategory = ({ selectedGenre, onSelect }) => {

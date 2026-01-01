@@ -76,7 +76,7 @@ const ViewUpcoming = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white">Upcoming Songs</h2>
+            <h2 className="text-3xl font-bold text-white">View Video Songs</h2>
             <p className="text-gray-400 mt-1">
               Manage upcoming releases ({upcomingSongs.length} total)
             </p>
@@ -101,6 +101,10 @@ const ViewUpcoming = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Sung By
                   </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+  Category
+</th>
+
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Type
                   </th>
@@ -145,21 +149,21 @@ const ViewUpcoming = () => {
 
                       {/* Sung By */}
                       <td className="px-6 py-4 text-gray-300">
-                        {song.sungBy}
+                      {song.sungBy?.name || "—"}
                       </td>
+                      
+                      <td className="px-6 py-4 text-gray-300">
+                       {song.category}
+                       </td>
 
                       {/* Type */}
                       <td className="px-6 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            song.itemType === "Video"
-                              ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                              : "bg-green-600/20 text-green-400 border border-green-500/30"
-                          }`}
-                        >
-                          {song.itemType}
-                        </span>
-                      </td>
+  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30">
+    MP4
+  </span>
+</td>
+
+                      
 
                       {/* Published Date */}
                       <td className="px-6 py-4 text-gray-300">

@@ -1,6 +1,7 @@
 const express = require("express");
 const UpcomingSong = require("../models/UpcomingSong");
-const uploadTrailer = require("../config/uploadTrailer");
+const uploadThumbnail = require("../config/uploadThumbnail");
+
 
 const router = express.Router();
 
@@ -11,53 +12,57 @@ const router = express.Router();
  */
 router.post(
   "/add",
-  uploadTrailer.fields([
-    { name: "trailer", maxCount: 1 },
-    { name: "thumbnail", maxCount: 1 },
-  ]),
+  uploadThumbnail.single("thumbnail"),
   async (req, res) => {
     try {
-      const { songTitle, sungBy, previewInfo, publishedDate, itemType } =
-        req.body;
-
-      // ✅ Validate fields
-      if (!songTitle || !sungBy || !publishedDate) {
-        return res.status(400).json({
-          message: "Song title, sung by, and published date are required",
-        });
-      }
-
-      // ✅ Validate files
-      if (!req.files?.trailer || !req.files?.thumbnail) {
-        return res.status(400).json({
-          message: "Trailer and thumbnail files are required",
-        });
-      }
-
-      // ✅ Create upcoming song
-      const upcomingSong = new UpcomingSong({
+      const {
         songTitle,
         sungBy,
         previewInfo,
         publishedDate,
-        itemType: itemType || "MP3",
-        trailerUrl: req.files.trailer[0].location,
-        thumbnailUrl: req.files.thumbnail[0].location,
+        youtubeUrl,
+        category, 
+      } = req.body;
+
+      if (!songTitle || !sungBy || !publishedDate || !youtubeUrl || !category) {
+        return res.status(400).json({ message: "All fields required" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Thumbnail required" });
+      }
+
+      const parsedDate = new Date(publishedDate);
+      if (isNaN(parsedDate)) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+
+      const upcomingSong = new UpcomingSong({
+        songTitle,
+        category,
+        sungBy,
+        previewInfo,
+        publishedDate: parsedDate,
+        youtubeUrl,
+        thumbnailUrl: req.file.location,
+        itemType: "Video",
       });
+
+      
 
       await upcomingSong.save();
 
       res.status(201).json({
         success: true,
         message: "Upcoming song added successfully",
-        upcomingSong,
       });
-    } catch (error) {
-      console.error("ADD UPCOMING SONG ERROR:", error);
-      res.status(500).json({ message: "Server error" });
+    } catch (err) {
+      console.error("ADD UPCOMING ERROR:", err);
+      res.status(500).json({ message: err.message });
     }
   }
 );
+
 
 /**
  * ===============================
@@ -66,9 +71,11 @@ router.post(
  */
 router.get("/", async (req, res) => {
   try {
-    const upcomingSongs = await UpcomingSong.find().sort({
-      publishedDate: -1,
-    });
+  
+    const upcomingSongs = await UpcomingSong.find()
+  .populate("sungBy", "name")   // 🔥 artist ka naam fetch
+  .sort({ publishedDate: -1 });
+
 
     res.status(200).json({
       success: true,
@@ -87,19 +94,20 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
   try {
-    const upcoming = await UpcomingSong.findById(req.params.id);
+    const upcoming = await UpcomingSong.findById(req.params.id)
+      .populate("sungBy", "name"); // ✅ ARTIST NAME FETCH
 
     if (!upcoming) {
       return res.status(404).json({ message: "Upcoming song not found" });
     }
 
-    // 🔥 IMPORTANT: return DIRECT OBJECT
     res.status(200).json(upcoming);
   } catch (error) {
     console.error("GET UPCOMING ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /**
  * ===============================
@@ -108,14 +116,19 @@ router.get("/:id", async (req, res) => {
  */
 router.put(
   "/:id",
-  uploadTrailer.fields([
-    { name: "trailer", maxCount: 1 },
-    { name: "thumbnail", maxCount: 1 },
-  ]),
+  uploadThumbnail.any(), // 🔥 THIS FIXES req.body
   async (req, res) => {
     try {
-      const { songTitle, sungBy, previewInfo, publishedDate, itemType } =
-        req.body;
+      console.log("BODY:", req.body); // 👈 debug (optional)
+
+      const {
+        songTitle,
+        sungBy,
+        previewInfo,
+        publishedDate,
+        youtubeUrl,
+        category,
+      } = req.body || {};
 
       const upcomingSong = await UpcomingSong.findById(req.params.id);
 
@@ -123,41 +136,42 @@ router.put(
         return res.status(404).json({ message: "Upcoming song not found" });
       }
 
-      // ✅ Update text fields
-      // ✅ Update text fields safely
-if (songTitle) upcomingSong.songTitle = songTitle;
-if (sungBy) upcomingSong.sungBy = sungBy;
-if (previewInfo) upcomingSong.previewInfo = previewInfo;
-if (itemType) upcomingSong.itemType = itemType;
+      if (songTitle) upcomingSong.songTitle = songTitle;
+      if (category) upcomingSong.category = category;
+      if (sungBy) upcomingSong.sungBy = sungBy;
+      if (previewInfo) upcomingSong.previewInfo = previewInfo;
+      if (youtubeUrl) upcomingSong.youtubeUrl = youtubeUrl;
 
-// 🔥 IMPORTANT FIX: Date only update if value exists
-if (publishedDate && publishedDate.trim() !== "") {
-  upcomingSong.publishedDate = publishedDate;
-}
-
-
-      // ✅ Update files ONLY if uploaded
-      if (req.files?.trailer) {
-        upcomingSong.trailerUrl = req.files.trailer[0].location;
+      if (publishedDate) {
+        const parsedDate = new Date(publishedDate);
+        if (!isNaN(parsedDate)) {
+          upcomingSong.publishedDate = parsedDate;
+        }
       }
 
-      if (req.files?.thumbnail) {
-        upcomingSong.thumbnailUrl = req.files.thumbnail[0].location;
+      // ✅ thumbnail optional
+      if (req.files && req.files.length > 0) {
+        const thumb = req.files.find(f => f.fieldname === "thumbnail");
+        if (thumb) {
+          upcomingSong.thumbnailUrl = thumb.location;
+        }
       }
 
       await upcomingSong.save();
 
-      res.status(200).json({
+      res.json({
         success: true,
         message: "Upcoming song updated successfully",
-        upcomingSong,
       });
-    } catch (error) {
-      console.error("UPDATE UPCOMING SONG ERROR:", error);
-      res.status(500).json({ message: "Server error" });
+    } catch (err) {
+      console.error("UPDATE UPCOMING ERROR:", err);
+      res.status(500).json({ message: err.message });
     }
   }
 );
+
+
+
 
 /**
  * ===============================
