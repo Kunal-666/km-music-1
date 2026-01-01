@@ -256,7 +256,7 @@ npm run dev
 1. **GET All Artists:**
 
    ```
-   GET http://localhost:5000/api/artists
+   GET /api/artists
    ```
 
    - ✅ Returns array of artists
@@ -264,7 +264,7 @@ npm run dev
 2. **GET Single Artist:**
 
    ```
-   GET http://localhost:5000/api/artists/{id}
+   GET /api/artists/{id}
    ```
 
    - ✅ Returns single artist object
@@ -272,7 +272,7 @@ npm run dev
 3. **UPDATE Artist:**
 
    ```
-   PUT http://localhost:5000/api/artists/{id}
+   PUT /api/artists/{id}
    Content-Type: multipart/form-data
    Body: name, bio, image, etc.
    ```
@@ -282,7 +282,7 @@ npm run dev
 
 4. **DELETE Artist:**
    ```
-   DELETE http://localhost:5000/api/artists/{id}
+   DELETE /api/artists/{id}
    ```
    - ✅ Deletes artist
    - ✅ Returns success message

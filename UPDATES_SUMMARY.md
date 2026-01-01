@@ -170,7 +170,7 @@ Save to MongoDB:
 ### 1. Add Upcoming Song
 
 ```
-POST http://localhost:5000/api/upcoming/add
+POST /api/upcoming/add
 Content-Type: multipart/form-data
 
 Body:
@@ -185,7 +185,7 @@ Body:
 ### 2. Get All Upcoming Songs
 
 ```
-GET http://localhost:5000/api/upcoming
+GET /api/upcoming
 ```
 
 ---

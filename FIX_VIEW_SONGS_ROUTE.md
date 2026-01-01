@@ -63,7 +63,7 @@ npm run dev
 **1. "Cannot read property of undefined"**
 
 - Backend might not be running
-- Check: `http://localhost:5000/api/songs`
+- Check: `/api/songs`
 
 **2. "401 Unauthorized"**
 
@@ -112,7 +112,7 @@ When you click "View Songs" in sidebar, you should see:
    - Share the error message
 
 3. **Test API Directly:**
-   - Open: `http://localhost:5000/api/songs`
+   - Open: `/api/songs`
    - Should see JSON response with songs array
 
 ---

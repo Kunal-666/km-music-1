@@ -202,26 +202,26 @@ node server.js
 **Get All Songs:**
 
 ```
-GET http://localhost:5000/api/songs
+GET /api/songs
 ```
 
 **Get Single Song:**
 
 ```
-GET http://localhost:5000/api/songs/{id}
+GET /api/songs/{id}
 ```
 
 **Update Song:**
 
 ```
-PUT http://localhost:5000/api/songs/{id}
+PUT /api/songs/{id}
 Body: songName, category, audioType, etc.
 ```
 
 **Delete Song:**
 
 ```
-DELETE http://localhost:5000/api/songs/{id}
+DELETE /api/songs/{id}
 ```
 
 ---

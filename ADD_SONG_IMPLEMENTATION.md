@@ -177,13 +177,13 @@ All 20 categories from your UI:
 ### 1. Get Artists (for dropdown)
 
 ```
-GET http://localhost:5000/api/songs/artists
+GET /api/songs/artists
 ```
 
 ### 2. Verify Artist
 
 ```
-POST http://localhost:5000/api/songs/verify-artist
+POST /api/songs/verify-artist
 Body: {
   "artistId": "675f1234abcd...",
   "artistName": "Artist Name"
@@ -193,7 +193,7 @@ Body: {
 ### 3. Add Song
 
 ```
-POST http://localhost:5000/api/songs/add
+POST /api/songs/add
 Content-Type: multipart/form-data
 Body:
   - songName (text)
@@ -208,7 +208,7 @@ Body:
 ### 4. Get All Songs
 
 ```
-GET http://localhost:5000/api/songs
+GET /api/songs
 ```
 
 ---
